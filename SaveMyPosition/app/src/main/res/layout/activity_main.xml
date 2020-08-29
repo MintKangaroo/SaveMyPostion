@@ -14,13 +14,27 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/myLocationSaveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:background="#9ED5CF"
+        android:src="@drawable/ic_schedule_24px"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="55dp"
+        app:fabSize="mini"/>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/myLocationButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:src="@drawable/ic_launcher_background"
+        android:background="#9ED5CF"
+        android:src="@drawable/ic_autorenew_24px"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginEnd="8dp"

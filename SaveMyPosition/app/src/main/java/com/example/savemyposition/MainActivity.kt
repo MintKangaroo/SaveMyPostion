@@ -3,6 +3,7 @@ package com.example.savemyposition
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
@@ -15,7 +16,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.activity_main.*
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -45,6 +47,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         myLocationButton.setOnClickListener { onMyLocationButtonClick() }
+
+        val DataPage = Intent(this,SaveDataActivity::class.java)
+
+        myLocationSaveButton.setOnClickListener { startActivity(DataPage)}
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -91,7 +97,11 @@ class MainActivity : AppCompatActivity() {
 
         val lastKnownLocation: Location = locationManager.getLastKnownLocation(locationProvider)
 
-        Log.d("로그","${lastKnownLocation.latitude}+${lastKnownLocation.longitude}")
+        val currentDateTime = Calendar.getInstance().time
+
+        var dateFormat = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.KOREA).format(currentDateTime)
+
+        Toast.makeText(this, "${dateFormat}+${lastKnownLocation.latitude}+${lastKnownLocation.longitude}",Toast.LENGTH_LONG).show()
 
         return LatLng(lastKnownLocation.latitude, lastKnownLocation.longitude)
     }
@@ -124,5 +134,9 @@ class MainActivity : AppCompatActivity() {
         super.onLowMemory()
         mapView.onLowMemory()
     }
+
+
+
+    
 
 }

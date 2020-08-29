@@ -26,6 +26,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SaveDataActivity"/>
+        <activity android:name=".SplahActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
