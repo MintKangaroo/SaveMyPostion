@@ -1,47 +1,128 @@
 package com.example.savemyposition
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import android.util.Log
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.android.synthetic.main.activity_main.*
+
+
 
 class MainActivity : AppCompatActivity() {
+
+    val PERMISSIONS = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION)
+
+    val REQUEST_PERMISSION_CODE = 1
+
+    val DEFAULT_ZOOM_LEVEL = 17f
+
+    val CITY_HALL = LatLng(37.5662952, 126.97794509999994)
+
+    var googleMap: GoogleMap? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-    }
-}
 
-class MapFragment : Fragment(), OnMapReadyCallback {
+        mapView.onCreate(savedInstanceState)
 
-    private lateinit var mMap: GoogleMap
-    override fun onCreateView(
+        if (checkPermissions()) {
+            initMap()
+        } else {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_PERMISSION_CODE)
+        }
 
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val rootView: View = inflater.inflate(R.layout.fragment_map, container, false)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.mapview) as SupportMapFragment
-
-        mapFragment.getMapAsync(this)
-
-        // Inflate the layout for this fragment
-
-        return rootView
+        myLocationButton.setOnClickListener { onMyLocationButtonClick() }
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        val marker = LatLng(35.241615, 128.695587)
-        mMap.addMarker(MarkerOptions().position(marker).title("Marker LAB"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(marker))
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        initMap()
     }
+
+    private fun checkPermissions(): Boolean {
+
+        for (permission in PERMISSIONS) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false
+            }
+        }
+        return true
+    }
+
+    @SuppressLint("MissingPermission")
+    fun initMap() {
+        mapView.getMapAsync {
+
+            googleMap = it
+            it.uiSettings.isMyLocationButtonEnabled = false
+
+            when {
+                checkPermissions() -> {
+                    it.isMyLocationEnabled = true
+                    it.moveCamera(CameraUpdateFactory.newLatLngZoom(getMyLocation(), DEFAULT_ZOOM_LEVEL))
+                }
+                else -> {
+                    it.moveCamera(CameraUpdateFactory.newLatLngZoom(CITY_HALL, DEFAULT_ZOOM_LEVEL))
+                }
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getMyLocation(): LatLng {
+
+        val locationProvider: String = LocationManager.GPS_PROVIDER
+
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        val lastKnownLocation: Location = locationManager.getLastKnownLocation(locationProvider)
+
+        Log.d("로그","${lastKnownLocation.latitude}+${lastKnownLocation.longitude}")
+
+        return LatLng(lastKnownLocation.latitude, lastKnownLocation.longitude)
+    }
+
+    fun onMyLocationButtonClick() {
+        when {
+            checkPermissions() -> googleMap?.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(getMyLocation(), DEFAULT_ZOOM_LEVEL)
+            )
+            else -> Toast.makeText(applicationContext, "위치사용권한 설정에 동의해주세요", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
 }
