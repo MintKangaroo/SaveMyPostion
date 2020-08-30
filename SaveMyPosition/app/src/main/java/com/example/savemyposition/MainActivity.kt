@@ -5,6 +5,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
@@ -18,9 +22,16 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.concurrent.timer
+
+class MainActivity : AppCompatActivity(),SensorEventListener{
+    private val sensorManager1 by lazy {
+    getSystemService(Context.SENSOR_SERVICE) as SensorManager
+}
 
 
-class MainActivity : AppCompatActivity() {
+
+    val helper = DBHelper(this)
 
     val PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -38,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         mapView.onCreate(savedInstanceState)
 
         if (checkPermissions()) {
@@ -45,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_PERMISSION_CODE)
         }
+
 
         myLocationButton.setOnClickListener { onMyLocationButtonClick() }
 
@@ -99,9 +112,12 @@ class MainActivity : AppCompatActivity() {
 
         val currentDateTime = Calendar.getInstance().time
 
-        var dateFormat = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.KOREA).format(currentDateTime)
+        val dateFormat = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.KOREA).format(currentDateTime)
 
-        Toast.makeText(this, "${dateFormat}+${lastKnownLocation.latitude}+${lastKnownLocation.longitude}",Toast.LENGTH_LONG).show()
+        val latitude = lastKnownLocation.latitude.toString()
+        val longitude = lastKnownLocation.longitude.toString()
+
+        helper.addPostion(dateFormat,latitude,longitude)
 
         return LatLng(lastKnownLocation.latitude, lastKnownLocation.longitude)
     }
@@ -135,8 +151,14 @@ class MainActivity : AppCompatActivity() {
         mapView.onLowMemory()
     }
 
+    override fun onSensorChanged(event: SensorEvent?) {
+        Toast.makeText(applicationContext, "움직임 감지", Toast.LENGTH_LONG).show()
+        getMyLocation()
+    }
 
-
-    
-
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
 }
+
+
+
